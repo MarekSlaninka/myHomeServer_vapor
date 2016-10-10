@@ -26,13 +26,14 @@ final class GateController {
         self.lowStateDuration = 0.5
     }
     
-    func openGate() {
+    func openGate() -> String {
         guard self.gpioForGate != nil else {
-            fatalError("It has not been possible to initialised the LED GPIO pin")
+            return "It has not been possible to initialised the LED GPIO pin"
         }
 
         self.gpioForGate?.value = 1
         sleep(UInt32(round(highStateDuration)))
         self.gpioForGate?.value = 0
+        return "ok"
     }
 }
