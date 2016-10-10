@@ -12,8 +12,8 @@ drop.get("/tomas") { _ in
 
 drop.get("/start") { _ in
     
-    GateController.sharedInstance.openGate()
-    return "otvoreke"
+    return GateController.sharedInstance.openGate()
+//    return "otvoreke"
     
 }
 
