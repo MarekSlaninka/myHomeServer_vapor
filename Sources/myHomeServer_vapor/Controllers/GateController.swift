@@ -42,7 +42,7 @@ final class GateController {
 
 final class TempController {
     static let sharedInstance = TempController()
-    let probeNames = ["28-28-021564ce28ff", "28-021564f10eff"]
+    let probeNames = ["28-021564ce28ff", "28-021564f10eff"]
     let probeDirectory = "/sys/bus/w1/devices/"
     
     func getTemp() -> String {
