@@ -17,5 +17,12 @@ drop.get("/start") { _ in
     
 }
 
+drop.get("/temp") { _ in
+    return TempController.sharedInstance.getTemp()
+  
+//        return "otvoreke"
+    
+}
+
 
 drop.run()
