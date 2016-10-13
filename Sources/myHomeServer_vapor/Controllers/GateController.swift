@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyGPIO
+import HTTP
 
 final class GateController {
     static let sharedInstance = GateController()
@@ -47,11 +48,10 @@ final class TempController {
     
     func getTemp() -> String {
         var stringTemp = "temps: "
-        for probe in probeNames {
-            stringTemp.append(String(readProbe(name: probe))+"°C   " )
+        let probes = self.findConnectedThermometers()
+        for probe in probes {
+            stringTemp.append(String(readProbe(name: probe!))+"°C   " )
         }
-        
-        
         return stringTemp
     }
     
@@ -92,5 +92,17 @@ final class TempController {
         return temp
     }
     
+    func findConnectedThermometers() -> [String?]{
+        let fileManager = FileManager.default
+        guard let enumerator = fileManager.enumerator(atPath: self.probeDirectory) else {return []}
+        
+        var thermometers: [String] = []
+        while let element = enumerator.nextObject() as? String {
+            if element.hasPrefix("28-") {
+                thermometers.append(element)
+            }
+        }
+        return thermometers
+    }
     
 }
