@@ -50,23 +50,23 @@ final class GateController {
         
         try? background {
             drop.console.print("background", newLine: true)
-
+            if self.gateOpen {
+                self.gateOpen = false
+                self.gateClosed()
+                drop.console.print("closed", newLine: true)
+            } else {
+                self.gateOpen = true
+                self.gateOpened()
+                drop.console.print("opened", newLine: true)
+            }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-            drop.console.print("background after", newLine: true)
-        }
-            #if os(Linux)
-                
-                self.gateTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (tr: Timer) in
-                    drop.console.print("timer", newLine: true)
-                }
-                #else
-                
-            #endif
+        
 
 
     }
+    
+    
     
     func setINMethods() {
         
@@ -83,6 +83,17 @@ final class GateController {
         })
     }
     
+    func changeLight() {
+        if self.gateOpen {
+            self.gateOpen = false
+            self.gateClosed()
+            drop.console.print("closed", newLine: true)
+        } else {
+            self.gateOpen = true
+            self.gateOpened()
+            drop.console.print("opened", newLine: true)
+        }
+    }
     
     func setTimerOnInit() {
         switch self.gpioForGateSensor!.value {
@@ -124,7 +135,16 @@ final class GateController {
     }
     
     func setTimer() {
-        
+        #if os(Linux)
+            drop.console.print("set timer", newLine: true)
+
+            self.gateTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (tr: Timer) in
+                drop.console.print("timer fired", newLine: true)
+                self.changeLight()
+            }
+        #else
+            
+        #endif
     }
     
     
