@@ -43,37 +43,21 @@ final class GateController {
 //        self.setTimerOnInit()
         self.setINMethods()
         drop.console.print("initing", newLine: true)
+        self.setTimer()
 
-        print("inited")
     }
     
     func setINMethods() {
-        self.gpioForGateSensor?.onRaising({ (gp: GPIO) in
-            print("raising")
-            drop.console.print("raising", newLine: true)
-
-            self.gateClosed()
+        
+        self.gpioForGateSensor?.onChange({ (gp: GPIO) in
             if self.gateOpen {
                 self.gateOpen = false
-                self.gateTimer?.invalidate()
-                self.gateTimer = nil
-            }
-        })
-        
-        self.gpioForGateSensor?.onFalling({ (gp: GPIO) in
-            drop.console.print("falling", newLine: true)
-
-            print("falling")
-            self.gateClosed()
-            if self.gateOpen {
-                if self.gateTimer == nil {
-//                    self.setTimer()
-                } else if !self.gateTimer!.isValid {
-//                    self.setTimer()
-                }
+                self.gateClosed()
+                drop.console.print("closed", newLine: true)
             } else {
                 self.gateOpen = true
-//                self.setTimer()
+                self.gateOpened()
+                drop.console.print("opened", newLine: true)
             }
         })
     }
@@ -105,12 +89,12 @@ final class GateController {
     }
     
     func gateOpened() {
-        self.gpioForRemote?.value = 0
+        self.gpioForRemote?.value = 1
 
     }
     
     func gateClosed() {
-        self.gpioForRemote?.value = 1
+        self.gpioForRemote?.value = 0
 
     }
     
@@ -120,15 +104,21 @@ final class GateController {
     
     func setTimer() {
         if #available(OSX 10.12, *) {
-            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
-                self.gateOpenedForLongTime()
+//            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
+//                self.gateOpenedForLongTime()
+//            })
+            self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
+                drop.console.print("timer", newLine: true)
             })
         } else {
             // Fallback on earlier versions
         }
         #if os(Linux)
-            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
-                self.gateOpenedForLongTime()
+//            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
+//                self.gateOpenedForLongTime()
+//            })
+            self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
+                drop.console.print("timer", newLine: true)
             })
         #else
             
