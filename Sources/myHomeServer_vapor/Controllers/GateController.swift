@@ -53,10 +53,15 @@ final class GateController {
 
         }
         
-        DispatchQueue.global().asyncAfter(deadline: .now() + 3) { 
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
             drop.console.print("background after", newLine: true)
-
         }
+        
+        
+        Timerer.start(Timerer.init(interval: 3) { (timer: Timer) in
+            drop.console.print("timer", newLine: true)
+            
+        })
 
     }
     
