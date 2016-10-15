@@ -42,7 +42,7 @@ final class GateController {
         self.gpioForGateSensor!.direction = .IN
 //        self.setTimerOnInit()
         self.setINMethods()
-        drop.console.print("initing", newLine: true)
+        drop.console.print("initing finished", newLine: true)
         self.setTimer()
 
     }
@@ -117,6 +117,8 @@ final class GateController {
 //            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
 //                self.gateOpenedForLongTime()
 //            })
+            drop.console.print("timer settings up", newLine: true)
+
             self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
                 drop.console.print("timer", newLine: true)
             })
