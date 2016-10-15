@@ -118,7 +118,11 @@ final class GateController {
 //                self.gateOpenedForLongTime()
 //            })
             drop.console.print("timer settings up", newLine: true)
-
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                drop.console.print("dispatch", newLine: true)
+            }
+            
             self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
                 drop.console.print("timer", newLine: true)
             }).fire()
