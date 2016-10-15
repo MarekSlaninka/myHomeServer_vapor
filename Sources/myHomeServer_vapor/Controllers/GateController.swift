@@ -9,6 +9,7 @@
 import Foundation
 import SwiftyGPIO
 import HTTP
+import Dispatch
 
 
 
@@ -49,6 +50,11 @@ final class GateController {
         
         try? background {
             drop.console.print("background", newLine: true)
+
+        }
+        
+        DispatchQueue.global().asyncAfter(deadline: .now() + 3) { 
+            drop.console.print("background after", newLine: true)
 
         }
 
