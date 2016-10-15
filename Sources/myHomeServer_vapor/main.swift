@@ -1,6 +1,7 @@
 import Vapor
 
 let drop = Droplet()
+_ = GateController.sharedInstance
 
 drop.get("/hello") { _ in
     return "Hello Vapor"
@@ -13,14 +14,11 @@ drop.get("/tomas") { _ in
 drop.get("/start") { _ in
     
     return GateController.sharedInstance.openGate()
-//    return "otvoreke"
     
 }
 
 drop.get("/temp") { _ in
     return TempController.sharedInstance.getTemp()
-  
-//        return "otvoreke"
     
 }
 

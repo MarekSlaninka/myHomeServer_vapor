@@ -12,97 +12,119 @@ import HTTP
 
 final class GateController {
     static let sharedInstance = GateController()
-    let gpioForGate: GPIO?
-    let highStateDuration: TimeInterval
-    let lowStateDuration: TimeInterval
+    let gpioForRemote: GPIO?
+    let gpioForGateSensor: GPIO?
+    let highStateDuration: TimeInterval = 1
+    let remotePinName: GPIOName = .P17
+    let sensorPinName: GPIOName = .P27
+    var gateOpen: Bool = false
+    var gateTimer: Timer?
+    let timeInMinutes: Double = 15
     
     init() {
-        
         let gpios = SwiftyGPIO.GPIOs(for: .RaspberryPi2)
-        self.gpioForGate = gpios[.P17]
-        guard self.gpioForGate != nil else {
+        
+        //set GPIO for remote controll
+        self.gpioForRemote = gpios[self.remotePinName]
+        guard self.gpioForRemote != nil else {
             fatalError("It has not been possible to initialised the LED GPIO pin")
         }
-        self.highStateDuration = 3
-        self.lowStateDuration = 0.5
+        self.gpioForRemote?.direction = .OUT
+
+        
+        //set GPIO for gate sensor
+        self.gpioForGateSensor = gpios[self.sensorPinName]
+        guard self.gpioForGateSensor != nil else {
+            fatalError("It has not been possible to initialised the LED GPIO pin")
+        }
+        self.gpioForGateSensor!.direction = .IN
+        self.setTimerOnInit()
+        self.setINMethods()
+        
+    }
+    
+    func setINMethods() {
+        self.gpioForGateSensor?.onRaising({ (gp: GPIO) in
+            self.gateClosed()
+            if self.gateOpen {
+                self.gateOpen = false
+                self.gateTimer?.invalidate()
+                self.gateTimer = nil
+            }
+        })
+        
+        self.gpioForGateSensor?.onFalling({ (gp: GPIO) in
+            self.gateClosed()
+            if self.gateOpen {
+                if self.gateTimer == nil {
+                    self.setTimer()
+                } else if !self.gateTimer!.isValid {
+                    self.setTimer()
+                }
+            } else {
+                self.gateOpen = true
+                self.setTimer()
+            }
+        })
+    }
+    
+    
+    func setTimerOnInit() {
+        switch self.gpioForGateSensor!.value {
+        case 0:
+            self.gateOpen = true
+            self.setTimer()
+            break
+        case 1:
+            self.gateOpen = false
+            break
+        default:
+            break
+        }
+
     }
     
     func openGate() -> String {
-        guard self.gpioForGate != nil else {
+        guard self.gpioForRemote != nil else {
             return "It has not been possible to initialised the LED GPIO pin"
         }
-        self.gpioForGate?.direction = .OUT
-        self.gpioForGate?.value = 1
+        self.gpioForRemote?.value = 1
         sleep(UInt32(round(highStateDuration)))
-        self.gpioForGate?.value = 0
+        self.gpioForRemote?.value = 0
         return "ok"
     }
     
+    func gateOpened() {
+        self.gpioForRemote?.value = 0
 
-}
-
-final class TempController {
-    static let sharedInstance = TempController()
-    let probeNames = ["28-021564ce28ff", "28-021564f10eff"]
-    let probeDirectory = "/sys/bus/w1/devices/"
-    
-    func getTemp() -> String {
-        var stringTemp = "temps: "
-        let probes = self.findConnectedThermometers()
-        for probe in probes {
-            stringTemp.append(String(readProbe(name: probe!))+"°C   " )
-        }
-        return stringTemp
     }
     
+    func gateClosed() {
+        self.gpioForRemote?.value = 1
+
+    }
     
-    func readProbe(name : String) -> Double {
-        let path = "\(probeDirectory)\(name)/w1_slave"
-        var outval = ""
-        let BUFSIZE = 1024
+    func gateOpenedForLongTime() {
         
-        let fp = fopen(path, "r")
-        
-        // try reading from /sys/bus/w1/devices/{prob name}/w1_slave
-        if fp != nil {
-            var buf = [CChar](repeating:CChar(0), count:BUFSIZE)
-            while fgets(&buf, Int32(BUFSIZE), fp) != nil {
-                //outval += String.fromCString(buf)!
-                outval += String(validatingUTF8:buf)!
-            }
-        }
-        
-        let temp : Double
-        if let tempS = outval.split(byString:"t=").last, let t = Double(tempS.trim()) {
-            temp = Double(t)/1000.0
+    }
+    
+    func setTimer() {
+        if #available(OSX 10.12, *) {
+            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
+                self.gateOpenedForLongTime()
+            })
         } else {
-            temp = 0.0
+            // Fallback on earlier versions
         }
-        
-        return Double(temp)
+        #if os(Linux)
+            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
+                self.gateOpenedForLongTime()
+            })
+        #else
+            
+        #endif
     }
-    
-    func doReading() -> Double{
-        //Turn LED on to indicate we've begun reading the temperature
-        let temp = readProbe(name: probeNames.first!)
-        
-        //sleep a little bit so we don't miss it. Not required
-        usleep(1000)
-        
-        return temp
-    }
-    
-    func findConnectedThermometers() -> [String?]{
-        let fileManager = FileManager.default
-        guard let enumerator = fileManager.enumerator(atPath: self.probeDirectory) else {return []}
-        
-        var thermometers: [String] = []
-        while let element = enumerator.nextObject() as? String {
-            if element.hasPrefix("28-") {
-                thermometers.append(element)
-            }
-        }
-        return thermometers
-    }
-    
+
 }
+
+
