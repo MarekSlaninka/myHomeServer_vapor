@@ -125,7 +125,7 @@ final class GateController {
             
             self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
                 drop.console.print("timer", newLine: true)
-            }).fire()
+            })
         #else
             
         #endif
