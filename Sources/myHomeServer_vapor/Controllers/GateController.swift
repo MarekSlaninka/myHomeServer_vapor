@@ -9,6 +9,13 @@
 import Foundation
 import SwiftyGPIO
 import HTTP
+import Dispatch
+
+extension DispatchQueue {
+    class var currentLabel: String {
+        return String(validatingUTF8: __dispatch_queue_get_label(nil))!
+    }
+}
 
 final class GateController {
     static let sharedInstance = GateController()
@@ -122,10 +129,17 @@ final class GateController {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 drop.console.print("dispatch", newLine: true)
             }
+            DispatchQueue.main.async {
+                self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
+                    drop.console.print("timer", newLine: true)
+                })
+            }
             
-            self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
-                drop.console.print("timer", newLine: true)
-            })
+            drop.console.print("Current queue: "+DispatchQueue.currentLabel, newLine: true)
+
+            
+            
+            
         #else
             
         #endif
