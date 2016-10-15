@@ -9,13 +9,8 @@
 import Foundation
 import SwiftyGPIO
 import HTTP
-import Dispatch
 
-extension DispatchQueue {
-    class var currentLabel: String {
-        return String(validatingUTF8: __dispatch_queue_get_label(nil))!
-    }
-}
+
 
 final class GateController {
     static let sharedInstance = GateController()
@@ -110,39 +105,7 @@ final class GateController {
     }
     
     func setTimer() {
-//        if #available(OSX 10.12, *) {
-////            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
-////                self.gateOpenedForLongTime()
-////            })
-//            self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
-//                drop.console.print("timer", newLine: true)
-//            })
-//        } else {
-//            // Fallback on earlier versions
-//        }
-//        #if os(Linux)
-////            self.gateTimer = Timer.scheduledTimer(withTimeInterval: self.timeInMinutes * 60, repeats: false, block: { (tmr: Timer) in
-////                self.gateOpenedForLongTime()
-////            })
-////            drop.console.print("timer settings up", newLine: true)
-////            
-////            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-////                drop.console.print("dispatch", newLine: true)
-////            }
-////            DispatchQueue.main.async {
-////                self.gateTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: { (tim: Timer) in
-////                    drop.console.print("timer", newLine: true)
-////                })
-////            }
-////            
-////            drop.console.print("Current queue: "+DispatchQueue.currentLabel, newLine: true)
-//
-//            
-//            
-//            
-//        #else
-//            
-//        #endif
+        
     }
     
     
