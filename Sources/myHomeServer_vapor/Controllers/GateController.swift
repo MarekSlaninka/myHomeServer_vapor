@@ -25,7 +25,7 @@ final class GateController {
     
     init() {
         drop.console.print("initing", newLine: true)
-
+        
         let gpios = SwiftyGPIO.GPIOs(for: .RaspberryPi2)
         
         //set GPIO for remote controll
@@ -46,6 +46,11 @@ final class GateController {
         self.setINMethods()
         drop.console.print("initing finished", newLine: true)
         self.setTimer()
+        
+        try? background {
+            drop.console.print("background", newLine: true)
+
+        }
 
     }
     
