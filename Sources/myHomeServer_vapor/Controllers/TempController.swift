@@ -9,6 +9,7 @@
 import Foundation
 import SwiftyGPIO
 import HTTP
+import Console
 
 final class TempController {
     static let sharedInstance = TempController()

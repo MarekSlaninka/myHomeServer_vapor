@@ -22,6 +22,8 @@ final class GateController {
     let timeInMinutes: Double = 15
     
     init() {
+        drop.console.print("initing", newLine: true)
+
         let gpios = SwiftyGPIO.GPIOs(for: .RaspberryPi2)
         
         //set GPIO for remote controll
@@ -38,13 +40,18 @@ final class GateController {
             fatalError("It has not been possible to initialised the LED GPIO pin")
         }
         self.gpioForGateSensor!.direction = .IN
-        self.setTimerOnInit()
+//        self.setTimerOnInit()
         self.setINMethods()
-        
+        drop.console.print("initing", newLine: true)
+
+        print("inited")
     }
     
     func setINMethods() {
         self.gpioForGateSensor?.onRaising({ (gp: GPIO) in
+            print("raising")
+            drop.console.print("raising", newLine: true)
+
             self.gateClosed()
             if self.gateOpen {
                 self.gateOpen = false
@@ -54,16 +61,19 @@ final class GateController {
         })
         
         self.gpioForGateSensor?.onFalling({ (gp: GPIO) in
+            drop.console.print("falling", newLine: true)
+
+            print("falling")
             self.gateClosed()
             if self.gateOpen {
                 if self.gateTimer == nil {
-                    self.setTimer()
+//                    self.setTimer()
                 } else if !self.gateTimer!.isValid {
-                    self.setTimer()
+//                    self.setTimer()
                 }
             } else {
                 self.gateOpen = true
-                self.setTimer()
+//                self.setTimer()
             }
         })
     }
@@ -73,7 +83,7 @@ final class GateController {
         switch self.gpioForGateSensor!.value {
         case 0:
             self.gateOpen = true
-            self.setTimer()
+//            self.setTimer()
             break
         case 1:
             self.gateOpen = false
@@ -124,6 +134,9 @@ final class GateController {
             
         #endif
     }
+    
+    
+
 
 }
 
