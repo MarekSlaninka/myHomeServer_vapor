@@ -57,11 +57,10 @@ final class GateController {
             drop.console.print("background after", newLine: true)
         }
         
-        
-        Timerer.start(Timerer.init(interval: 3) { (timer: Timer) in
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (tr: Timer) in
             drop.console.print("timer", newLine: true)
-            
-        })
+        }
+
 
     }
     
