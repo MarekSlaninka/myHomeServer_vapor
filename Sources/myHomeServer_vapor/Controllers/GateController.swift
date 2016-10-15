@@ -56,10 +56,14 @@ final class GateController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
             drop.console.print("background after", newLine: true)
         }
-        
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (tr: Timer) in
-            drop.console.print("timer", newLine: true)
-        }
+            #if os(Linux)
+                
+                self.gateTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (tr: Timer) in
+                    drop.console.print("timer", newLine: true)
+                }
+                #else
+                
+            #endif
 
 
     }
