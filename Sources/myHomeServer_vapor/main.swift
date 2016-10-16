@@ -21,12 +21,12 @@ drop.get("/start") { _ in
 }
 
 drop.get("/temp") { _ in
-    DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-        drop.console.print("background after", newLine: true)
-    }
-    
-    
 
+    
+    DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .seconds(5)) {
+        drop.console.print("background after", newLine: true)
+
+    }
     return TempController.sharedInstance.getTemp()
 }
 
