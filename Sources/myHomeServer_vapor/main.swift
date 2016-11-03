@@ -2,9 +2,9 @@ import Vapor
 import Foundation
 import Dispatch
 
-
 let drop = Droplet()
 let gate = GateController(_drop: drop)
+
 
 
 drop.get("/hello") { _ in
@@ -58,5 +58,22 @@ drop.get("/background") { _ in
     return "background"
     
 }
+
+drop.get("timer",":time") { request in
+    var time: Double = 2
+    if let time = request.parameters["time"]?.double {
+        
+    }
+    let timer = Timer.init(interval: time, handler: { (timer) in
+        drop.console.print("timer after \(time)", newLine: true)
+
+    }, repeats: false)
+    try? timer.start()
+    
+    return "timer"
+}
+
+
+
 
 drop.run()
