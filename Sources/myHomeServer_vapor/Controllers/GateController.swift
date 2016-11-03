@@ -7,14 +7,18 @@
 //
 
 import Foundation
+
 import SwiftyGPIO
 import HTTP
 import Dispatch
-
+import Vapor
 
 
 final class GateController {
-    static let sharedInstance = GateController()
+//    static let sharedInstance = GateController()
+    
+    var drop: Droplet
+    
     let gpioForRemote: GPIO?
     let gpioForGateSensor: GPIO?
     let highStateDuration: TimeInterval = 1
@@ -24,8 +28,10 @@ final class GateController {
     var gateTimer: Timer?
     let timeInMinutes: Double = 15
     
-    init() {
-        drop.console.print("initing", newLine: true)
+    
+    init(_drop: Droplet) {
+        self.drop = _drop
+        self.drop.console.print("initing", newLine: true)
         
         let gpios = SwiftyGPIO.GPIOs(for: .RaspberryPi2)
         
@@ -45,25 +51,21 @@ final class GateController {
         self.gpioForGateSensor!.direction = .IN
 //        self.setTimerOnInit()
         self.setINMethods()
-        drop.console.print("initing finished", newLine: true)
+        self.drop.console.print("initing finished", newLine: true)
         self.setTimer()
         
         try? background {
-            drop.console.print("background", newLine: true)
+            self.drop.console.print("background", newLine: true)
             if self.gateOpen {
                 self.gateOpen = false
                 self.gateClosed()
-                drop.console.print("closed", newLine: true)
+                self.drop.console.print("closed", newLine: true)
             } else {
                 self.gateOpen = true
                 self.gateOpened()
-                drop.console.print("opened", newLine: true)
+                self.drop.console.print("opened", newLine: true)
             }
         }
-        
-        
-
-
     }
     
     
@@ -74,11 +76,11 @@ final class GateController {
             if self.gateOpen {
                 self.gateOpen = false
                 self.gateClosed()
-                drop.console.print("closed", newLine: true)
+                self.drop.console.print("closed", newLine: true)
             } else {
                 self.gateOpen = true
                 self.gateOpened()
-                drop.console.print("opened", newLine: true)
+                self.drop.console.print("opened", newLine: true)
             }
         })
     }
@@ -87,11 +89,11 @@ final class GateController {
         if self.gateOpen {
             self.gateOpen = false
             self.gateClosed()
-            drop.console.print("closed", newLine: true)
+            self.drop.console.print("closed", newLine: true)
         } else {
             self.gateOpen = true
             self.gateOpened()
-            drop.console.print("opened", newLine: true)
+            self.drop.console.print("opened", newLine: true)
         }
     }
     
@@ -136,10 +138,10 @@ final class GateController {
     
     func setTimer() {
         #if os(Linux)
-            drop.console.print("set timer", newLine: true)
-
+            self.drop.console.print("set timer", newLine: true)
+            
             self.gateTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (tr: Timer) in
-                drop.console.print("timer fired", newLine: true)
+                self.drop.console.print("timer fired /(Date())", newLine: true)
                 self.changeLight()
             }
         #else
