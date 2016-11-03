@@ -36,13 +36,13 @@ drop.get("/after",":time") { request in
     if let time = request.parameters["time"]?.double {
         
     }
-    drop.console.print("background before in time: (\time)", newLine: true)
+    drop.console.print("background before in time: \(time)", newLine: true)
 
     DispatchQueue.global().asyncAfter(deadline: DispatchTime.init(secondsFromNow: time), execute: {
         drop.console.print("background after", newLine: true)
     })
     
-    return "after time: (\time)"
+    return "after time: \(time)"
 }
 
 drop.get("/background") { _ in
