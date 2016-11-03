@@ -95,7 +95,7 @@ public class Strand {
 
 #if swift(>=3.0)
     #if os(Linux)
-        private func runner(arg: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
+        private func runner(arg: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
         guard let arg = arg else { return nil }
         let unmanaged = Unmanaged<StrandClosure>.fromOpaque(arg)
         unmanaged.takeUnretainedValue().closure()
@@ -111,7 +111,7 @@ public class Strand {
     }
     #endif
 #else
-    private func runner(arg: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
+    private func runner(arg: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     let unmanaged = Unmanaged<StrandClosure>.fromOpaque(OpaquePointer(arg))
     unmanaged.takeUnretainedValue().closure()
     unmanaged.release()
