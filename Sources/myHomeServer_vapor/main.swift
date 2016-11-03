@@ -31,14 +31,18 @@ drop.get("/temp") { _ in
     return TempController.sharedInstance.getTemp()
 }
 
-drop.get("/after") { _ in
-    drop.console.print("background before", newLine: true)
+drop.get("/after",":time") { request in
+    var time: Double = 2
+    if let time = request.parameters["time"]?.double {
+        
+    }
+    drop.console.print("background before in time: (\time)", newLine: true)
 
-    DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+    DispatchQueue.global().asyncAfter(deadline: DispatchTime.init(secondsFromNow: time), execute: {
         drop.console.print("background after", newLine: true)
     })
     
-    return "after"
+    return "after time: (\time)"
 }
 
 drop.get("/background") { _ in

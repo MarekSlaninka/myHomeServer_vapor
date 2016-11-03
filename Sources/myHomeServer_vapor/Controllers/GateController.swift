@@ -144,6 +144,8 @@ final class GateController {
                 self.drop.console.print("timer fired /(Date())", newLine: true)
                 self.changeLight()
             }
+            self.drop.console.print("timer  /(self.gateTimer)", newLine: true)
+
         #else
             
         #endif
