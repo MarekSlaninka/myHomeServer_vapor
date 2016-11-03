@@ -61,8 +61,8 @@ drop.get("/background") { _ in
 
 drop.get("timer",":time") { request in
     var time: Double = 2
-    if let time = request.parameters["time"]?.double {
-        
+    if let tm = request.parameters["time"]?.double {
+        time = tm
     }
     let timer = NewTimer.init(interval: time, handler: { (timer) in
         drop.console.print("timer after \(time)", newLine: true)
@@ -74,10 +74,10 @@ drop.get("timer",":time") { request in
     return "timer \(timer), time: \(time)"
 }
 
-drop.get("timer repeat",":time") { request in
+drop.get("timerrepeat",":time") { request in
     var time: Double = 2
-    if let time = request.parameters["time"]?.double {
-        
+    if let tm = request.parameters["time"]?.double {
+        time = tm
     }
     let timer = NewTimer.init(interval: time, handler: { (timer) in
         drop.console.print("timer after \(time)", newLine: true)
