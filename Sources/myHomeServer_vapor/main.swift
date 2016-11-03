@@ -15,7 +15,7 @@ drop.get("/tomas") { _ in
     return "Hello Tomas"
 }
 
-drop.get("/start") { _ in
+drop.get("/openGate") { _ in
     
     gate.setTimer()
     return gate.openGate()
@@ -23,42 +23,12 @@ drop.get("/start") { _ in
 }
 
 drop.get("/temp") { _ in
-
-    
-    DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .seconds(5)) {
-        drop.console.print("background after", newLine: true)
-    }
     return TempController.sharedInstance.getTemp()
 }
 
-drop.get("/after",":time") { request in
-    var time: Double = 2
-    if let time = request.parameters["time"]?.double {
-        
-    }
-    drop.console.print("background before in time: \(time)", newLine: true)
 
-    DispatchQueue.global().asyncAfter(deadline: DispatchTime.init(secondsFromNow: time), execute: {
-        drop.console.print("background after", newLine: true)
-    })
-    
-    return "after time: \(time)"
-}
 
-drop.get("/background") { _ in
-    
-    DispatchQueue.global().async {
-        var i = 0
-        while i < 50 {
-            i+=1
-            drop.console.print("background ", newLine: true)
-            sleep(2)
-        }
-    }
-    return "background"
-    
-}
-
+//Timer test WORK
 drop.get("timer",":time") { request in
     var time: Double = 2
     if let tm = request.parameters["time"]?.double {
@@ -74,20 +44,7 @@ drop.get("timer",":time") { request in
     return "timer \(timer), time: \(time)"
 }
 
-drop.get("timerrepeat",":time") { request in
-    var time: Double = 2
-    if let tm = request.parameters["time"]?.double {
-        time = tm
-    }
-    let timer = NewTimer.init(interval: time, handler: { (timer) in
-        drop.console.print("timer after \(time)", newLine: true)
-        
-    }, repeats: true)
-    try? timer.start()
-    
-    
-    return "timer \(timer), time: \(time)"
-}
+
 
 
 drop.run()
