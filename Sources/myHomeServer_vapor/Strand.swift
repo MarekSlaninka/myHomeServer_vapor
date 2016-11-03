@@ -56,7 +56,7 @@ public class Strand {
                 pthread = pt!
             #endif
         #else
-            let pointer = UnsafeMutablePointer<Void>(OpaquePointer(bitPattern: holder))
+            let pointer = UnsafeMutableRawPointer(holder.toOpaque())
             guard pthread_create(&pthread, nil, runner, pointer) == 0 else {
                 holder.release()
                 throw StrandError.threadCreationFailed
@@ -95,7 +95,7 @@ public class Strand {
 
 #if swift(>=3.0)
     #if os(Linux)
-    private func runner(arg: UnsafeMutablePointer<Void>?) -> UnsafeMutablePointer<Void>? {
+        private func runner(arg: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
         guard let arg = arg else { return nil }
         let unmanaged = Unmanaged<StrandClosure>.fromOpaque(arg)
         unmanaged.takeUnretainedValue().closure()
@@ -111,7 +111,7 @@ public class Strand {
     }
     #endif
 #else
-private func runner(arg: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<Void> {
+    private func runner(arg: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
     let unmanaged = Unmanaged<StrandClosure>.fromOpaque(OpaquePointer(arg))
     unmanaged.takeUnretainedValue().closure()
     unmanaged.release()

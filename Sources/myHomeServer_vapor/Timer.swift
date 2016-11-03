@@ -8,9 +8,8 @@
 
 import Dispatch
 
-
-typealias TimerCallback = (Timer) -> Void
-class Timer {
+typealias TimerCallback = (NewTimer) -> Void
+class NewTimer {
     var interval: Double
     var handler: TimerCallback
     var repeats: Bool

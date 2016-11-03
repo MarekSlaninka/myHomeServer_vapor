@@ -64,7 +64,7 @@ drop.get("timer",":time") { request in
     if let time = request.parameters["time"]?.double {
         
     }
-    let timer = Timer.init(interval: time, handler: { (timer) in
+    let timer = NewTimer.init(interval: time, handler: { (timer) in
         drop.console.print("timer after \(time)", newLine: true)
 
     }, repeats: false)
