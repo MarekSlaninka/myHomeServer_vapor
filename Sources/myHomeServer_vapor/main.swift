@@ -70,10 +70,24 @@ drop.get("timer",":time") { request in
     }, repeats: false)
     try? timer.start()
     
-    return "timer"
+    
+    return "timer \(timer), time: \(time)"
 }
 
-
+drop.get("timer repeat",":time") { request in
+    var time: Double = 2
+    if let time = request.parameters["time"]?.double {
+        
+    }
+    let timer = NewTimer.init(interval: time, handler: { (timer) in
+        drop.console.print("timer after \(time)", newLine: true)
+        
+    }, repeats: true)
+    try? timer.start()
+    
+    
+    return "timer \(timer), time: \(time)"
+}
 
 
 drop.run()

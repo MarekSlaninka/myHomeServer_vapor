@@ -23,12 +23,17 @@ class NewTimer {
     
     func start() throws {
         strand = try Strand {
+            drop.console.print("1", newLine: true)
+
             while self.repeats {
                 // Wait for alloted time
                 drop.console.wait(seconds: self.interval)
-                
+                drop.console.print("2", newLine: true)
+
                 // Execute on the main thread
-                DispatchQueue.global().async {
+                DispatchQueue.global().sync {
+                    drop.console.print("3", newLine: true)
+
                     self.execute()
                 }
 //                commandQueue.append(self.execute)
@@ -37,6 +42,8 @@ class NewTimer {
     }
     
     func execute() {
+        drop.console.print("4", newLine: true)
+
         handler(self)
     }
     
