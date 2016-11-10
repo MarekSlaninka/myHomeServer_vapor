@@ -44,7 +44,10 @@ drop.get("timer",":time") { request in
     return "timer \(timer), time: \(time)"
 }
 
-
+drop.get("/notif") { _ in
+    PushNotificationsManager.sharedInstance.sendNotification(withTitle: "RPi push", body: "Notifikacia z raspberry pi", completitionBlock:nil)
+    return "poslana notifikacia, dufam :D"
+}
 
 
 drop.run()
