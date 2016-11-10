@@ -3,26 +3,35 @@ import Foundation
 import Dispatch
 
 let drop = Droplet()
+#if os(Linux)
 let gate = GateController(_drop: drop)
+#endif
 
 
-
-drop.get("/hello") { _ in
-    return "Hello Vapor"
+drop.get("hello") { request in
+    let name = request.data["name"]?.string ?? "stranger"
+    return name
 }
 
 drop.get("/tomas") { _ in
     return "Hello Tomas"
 }
-
+#if os(Linux)
 drop.get("/openGate") { _ in
     
     gate.setTimer()
     return gate.openGate()
     
 }
+#endif
 
 drop.get("/temp") { _ in
+    do {
+        let spotifyResponse = try drop.client.get("https://api.weixin.qq.com/cgi-bin/token")
+        print(spotifyResponse)
+    } catch let error  {
+        print(error)
+    }
     return TempController.sharedInstance.getTemp()
 }
 
@@ -45,7 +54,7 @@ drop.get("timer",":time") { request in
 }
 
 drop.get("/notif") { _ in
-    if let resp = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "RPi push", body: "Notifikacia z raspberry pi", completitionBlock:nil){
+    if let resp = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "RPi push", body: "Notifikacia z raspberry pi", completitionBlock:nil, drop: drop){
         return resp
     } else {
         return "nevydalo"

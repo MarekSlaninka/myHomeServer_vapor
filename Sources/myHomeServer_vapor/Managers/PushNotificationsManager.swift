@@ -15,7 +15,17 @@ class PushNotificationsManager: NSObject {
     static let sharedInstance: PushNotificationsManager = PushNotificationsManager()
     
     
-    func sendNotification(withTitle title: String, body: String, completitionBlock: ((String?)->())?) -> Response? {
+    func sendNotification(withTitle title: String, body: String, completitionBlock: ((String?)->())?, drop: Droplet) -> Response? {
+        
+        
+        do {
+            let spotifyResponse = try drop.client.get("https://api.weixin.qq.com/cgi-bin/token")
+            print(spotifyResponse)
+        } catch let error  {
+            print(error)
+        }
+        
+        
         let param = [
             "to": "fVaWMgWu35M:APA91bFBOVsrJ8R-D3MZ8vvWRibupTEHA-InkaJqOhaMhxaTkKIPHfpzswxnguVQb4Zlci1SptFX8qKZYTurh45w-Mo_yk1A6gv8UwwllwhmucQjPibNwElQW9DCm_TCChMmvgk8j4lI",
             "priority": 10,
@@ -35,10 +45,17 @@ class PushNotificationsManager: NSObject {
 //        request.httpBody = try? JSONSerialization.data(withJSONObject: param, options: .prettyPrinted)
 //        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 //        request.addValue("Authorization", forHTTPHeaderField: "key="+Config().pushAuthKey)
-        
+        let jsonBody = try? JSONSerialization.data(withJSONObject: param, options: .prettyPrinted)
         let heders = ["application/json":"Content-Type","Authorization":"key="+Config().pushAuthKey]
 
-        let response = try? drop.client.post(Config().pushFirebaseUrl, headers: ["application/json":"Content-Type","Authorization":"key="+Config().pushAuthKey], query: [:], body: param as! BodyRepresentable)
+        
+         do {
+           let response = try drop.client.post(Config().pushFirebaseUrl, headers: ["application/json":"Content-Type","Authorization":"key="+Config().pushAuthKey], query: param as! [String : CustomStringConvertible], body: Body.data([]))
+            return response
+        } catch  {
+            debugPrint(error)
+        }
+        let response = try? drop.client.post(Config().pushFirebaseUrl, headers: ["application/json":"Content-Type","Authorization":"key="+Config().pushAuthKey], query: param as! [String : CustomStringConvertible], body: Body.data((jsonBody?.makeBytes())!))
         
         return response
         
