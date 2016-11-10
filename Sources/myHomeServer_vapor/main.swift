@@ -45,8 +45,12 @@ drop.get("timer",":time") { request in
 }
 
 drop.get("/notif") { _ in
-    PushNotificationsManager.sharedInstance.sendNotification(withTitle: "RPi push", body: "Notifikacia z raspberry pi", completitionBlock:nil)
-    return "poslana notifikacia, dufam :D"
+    if let resp = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "RPi push", body: "Notifikacia z raspberry pi", completitionBlock:nil){
+        return resp
+    } else {
+        return "nevydalo"
+    }
+//    return "poslana notifikacia, dufam :D"
 }
 
 
