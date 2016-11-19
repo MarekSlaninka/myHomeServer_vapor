@@ -25,10 +25,10 @@ struct Thermometer {
     }
     
     func toJson() -> [String: AnyObject]{
-        let sl: [String: AnyObject] = ["probeName": probeName as AnyObject,
-                                       "name": name as AnyObject? ?? "" as AnyObject,
-                                       "maxTemp": maxTemp as AnyObject,
-                                       "minTemp": minTemp as AnyObject]
+        let sl: [String: AnyObject] = ["probeName": probeName as! AnyObject,
+                                       "name": name as! AnyObject? ?? "" as! AnyObject,
+                                       "maxTemp": maxTemp as! AnyObject,
+                                       "minTemp": minTemp as! AnyObject]
         
         return sl
         

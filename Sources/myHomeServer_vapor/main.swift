@@ -54,7 +54,7 @@ drop.get("/temp") { _ in
 
 
 drop.post("/setConfig") { request in
-    debugPrint(request.data["probes"]?.array?.first)
+//    debugPrint(request.data["probes"]?.array?.first)
     
     
     
