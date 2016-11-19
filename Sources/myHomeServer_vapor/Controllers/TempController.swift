@@ -10,11 +10,79 @@ import Foundation
 import SwiftyGPIO
 import HTTP
 import Console
+import Jay
+import JSON
+
+struct Thermometer {
+    var probeName: String
+    var name: String?
+    var maxTemp: Double?
+    var minTemp: Double?
+    
+    init(probeName: String, name: String?) {
+        self.probeName = probeName
+        self.name = name
+    }
+    
+    func toJson() -> [String: String]{
+        let sl = ["probeName": probeName, "name": name ?? ""]
+        
+        return sl// try! JSONSerialization.data(withJSONObject: sl, options: .prettyPrinted)
+        
+    }
+    
+    init(fromJson: [String: String]){
+        self.probeName = fromJson["probeName"]!
+        self.name = fromJson["name"]
+//        self.probeName = try! (JSONSerialization.jsonObject(with: fromJson, options: []) as! [String: String])["probeName"]!
+//        self.name = try!  (JSONSerialization.jsonObject(with: fromJson, options: []) as! [String: String])["name"]!
+    }
+}
+
+
+
 
 final class TempController {
     static let sharedInstance = TempController()
-    let probeNames = ["28-021564ce28ff", "28-021564f10eff"]
+    var timer: NewTimer?
+    var probes: [Thermometer] = []
     let probeDirectory = "/sys/bus/w1/devices/"
+    
+    init() {
+        self.probes.append(Thermometer(probeName: "probeName1", name: "meno1"))
+        self.probes.append(Thermometer(probeName: "probeName2", name: "meno2"))
+    }
+    
+    
+    func setLoopForMeasurments(withIntervalInMinutes interval: Double = 5) {
+        try? self.timer?.cancel()
+
+        let time = interval * 60
+        
+        self.timer = NewTimer.init(interval: time, handler: { (timer) in
+            
+            
+        }, repeats: false)
+        try? self.timer?.start()
+    }
+
+    func readTempsFromAllThermometers() {
+        var measurment = [String: Double]()
+        for probe in self.probes {
+            guard probe.name != nil else {continue}
+            let temp = self.readProbe(name: probe.probeName)
+            guard temp != 1000 else {continue}
+            measurment[probe.name!] = temp
+            guard probe.maxTemp != nil else {continue}
+            if temp > probe.maxTemp! {
+                PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Vysoka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
+            }
+            guard probe.minTemp != nil else {continue}
+            if temp > probe.minTemp! {
+                PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Nizka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
+            }
+        }
+    }
     
     func getTemp() -> String {
         var stringTemp = "temps: "
@@ -24,6 +92,7 @@ final class TempController {
         }
         return stringTemp
     }
+    
     
     
     func readProbe(name : String) -> Double {
@@ -46,21 +115,13 @@ final class TempController {
         if let tempS = outval.split(byString:"t=").last, let t = Double(tempS.trim()) {
             temp = Double(t)/1000.0
         } else {
-            temp = 0.0
+            temp = 1000
         }
         
         return Double(temp)
     }
     
-    func doReading() -> Double{
-        //Turn LED on to indicate we've begun reading the temperature
-        let temp = readProbe(name: probeNames.first!)
-        
-        //sleep a little bit so we don't miss it. Not required
-        usleep(1000)
-        
-        return temp
-    }
+
     
     func findConnectedThermometers() -> [String?]{
         let fileManager = FileManager.default
@@ -73,6 +134,29 @@ final class TempController {
             }
         }
         return thermometers
+    }
+    
+    func loadProbesFromConfig() {
+        if let configRoute: URL = URL(string: "file://" + drop.workDir.finished(with: "/") + "Config/thermoProbes.json") {
+            if let config = try? Data.init(contentsOf: configRoute) {
+                if let probeArray = try? JSONSerialization.jsonObject(with: config, options: []) as? [[String: String]] {
+                    for ar in probeArray! {
+                        self.probes.append(Thermometer.init(fromJson: ar))
+                    }
+                    debugPrint(self.probes)
+                }
+            }
+        }
+    }
+    
+    func writeProbesToConfig() {
+        if let configRoute: URL = URL(string: drop.workDir.finished(with: "/") + "Config/thermoProbes.json") {
+            let js = self.probes.map { (th) -> [String: String] in
+                th.toJson()
+            }
+            let data = try? JSONSerialization.data(withJSONObject: js, options: .prettyPrinted)
+            try? data?.write(to: configRoute)
+        }
     }
     
 }

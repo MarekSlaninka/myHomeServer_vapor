@@ -124,12 +124,10 @@ final class GateController {
     
     func gateOpened() {
         self.gpioForRemote?.value = 1
-
     }
     
     func gateClosed() {
         self.gpioForRemote?.value = 0
-
     }
     
     func gateOpenedForLongTime() {

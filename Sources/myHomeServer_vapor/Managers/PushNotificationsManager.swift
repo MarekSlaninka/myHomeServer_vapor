@@ -34,9 +34,6 @@ class PushNotificationsManager: NSObject {
         let jsonString = String.init(data: jsonBody!, encoding: String.Encoding.ascii)
          do {
            let response = try drop.client.post(Config().pushFirebaseUrl, headers: ["Content-Type":"application/json","Authorization":"key="+Config().pushAuthKey], query: [:], body: jsonString!)
-            
-            debugPrint(response)
-            
             return response
         } catch  {
             debugPrint(error)
