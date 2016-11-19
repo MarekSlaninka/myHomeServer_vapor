@@ -24,16 +24,12 @@ struct Thermometer {
         self.name = name
     }
     
-    func toJson() -> [String: AnyObject]{
-        var sl = [String: AnyObject]()
-        drop.console.output("debug 1", style: ConsoleStyle.info, newLine: true)
-        sl["probeName"] = self.probeName as! AnyObject
-        drop.console.output("debug 2", style: ConsoleStyle.info, newLine: true)
-        if self.name != nil { sl["name"] = self.name as! AnyObject }
-        drop.console.output("debug 3", style: ConsoleStyle.info, newLine: true)
-        if self.maxTemp != nil {sl["maxTemp"] = self.maxTemp as! AnyObject }
-        drop.console.output("debug 4", style: ConsoleStyle.info, newLine: true)
-        if self.minTemp != nil {sl["minTemp"] = self.minTemp as! AnyObject }
+    func toJson() -> [String: Any?]{
+        let sl  =  ["probeName": probeName,
+                    "name": name ?? "" ,
+                    "maxTemp": maxTemp ?? nil ,
+                    "minTemp": minTemp ?? nil ] as [String : Any]
+        
         
         return sl
         
@@ -169,11 +165,11 @@ final class TempController {
     }
     
     func writeProbesToConfig() {
-        let js = self.probes.map({ (th) -> [String: AnyObject] in
+        let js = self.probes.map({ (th) -> [String: Any?] in
             th.toJson()
-        }) as? AnyObject
+        })
         
-        ConfigManager.sharedInstance.writeToConfig(object: js!, forKey: "probes")
+        ConfigManager.sharedInstance.writeToConfig(object: js as Any, forKey: "probes")
         
     }
     

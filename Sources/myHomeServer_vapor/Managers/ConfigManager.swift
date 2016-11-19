@@ -45,7 +45,7 @@ class ConfigManager: NSObject {
         try? data?.write(to: URL(string:self.plistPath + self.plistName)!)
     }
     
-    func writeToConfig(object: AnyObject, forKey key: String) {
+    func writeToConfig(object: Any, forKey key: String) {
         self.config[key] = object as AnyObject?
         self.saveConfigToPlist()
     }
