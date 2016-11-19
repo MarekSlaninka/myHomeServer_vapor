@@ -32,7 +32,7 @@ class ConfigManager: NSObject {
         let plistPath: String? = Bundle.main.path(forResource: "data", ofType: "plist")! //the path of the data
         let plistXML = FileManager.default.contents(atPath: plistPath!)!
         do {//convert the data to a dictionary and handle errors.
-            plistData = try PropertyListSerialization.propertyList(from: plistXML, options: .mutableContainersAndLeaves, format: &propertyListForamt) as! [String:AnyObject]
+            plistData = try PropertyListSerialization.propertyList(from: plistXML, options: [], format: &propertyListForamt) as! [String:AnyObject]
             return plistData
         } catch {
             print("Error reading plist: \(error), format: \(propertyListForamt)")
