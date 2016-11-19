@@ -15,7 +15,7 @@ class ConfigManager: NSObject {
     let plistName: String = "config.plist"
     var propertyListForamt =  PropertyListSerialization.PropertyListFormat.xml //Format of the Property List.
     
-    var config = [String: AnyObject]()
+    var config = [String: Any]()
     var lastChange: Date?
     override init() {
         super.init()
@@ -41,12 +41,12 @@ class ConfigManager: NSObject {
     }
     
     func saveConfigToPlist() {
-        let data = try? PropertyListSerialization.data(fromPropertyList: self.config as! AnyObject, format: self.propertyListForamt, options: 0)
+        let data = try? PropertyListSerialization.data(fromPropertyList: self.config as Any, format: self.propertyListForamt, options: 0)
         try? data?.write(to: URL(string:self.plistPath + self.plistName)!)
     }
     
     func writeToConfig(object: Any, forKey key: String) {
-        self.config[key] = object as AnyObject?
+        self.config[key] = object
         self.saveConfigToPlist()
     }
     
