@@ -24,60 +24,68 @@ struct Thermometer {
         self.name = name
     }
     
-    func toJson() -> [String: String]{
-        let sl = ["probeName": probeName, "name": name ?? ""]
+    func toJson() -> [String: AnyObject]{
+        let sl: [String: AnyObject] = ["probeName": probeName as AnyObject,
+                                       "name": name as AnyObject? ?? "" as AnyObject,
+                                       "maxTemp": maxTemp as AnyObject,
+                                       "minTemp": minTemp as AnyObject]
         
-        return sl// try! JSONSerialization.data(withJSONObject: sl, options: .prettyPrinted)
+        return sl
         
     }
     
-    init(fromJson: [String: String]){
-        self.probeName = fromJson["probeName"]!
-        self.name = fromJson["name"]
-//        self.probeName = try! (JSONSerialization.jsonObject(with: fromJson, options: []) as! [String: String])["probeName"]!
-//        self.name = try!  (JSONSerialization.jsonObject(with: fromJson, options: []) as! [String: String])["name"]!
+    init(fromJson: [String: AnyObject]){
+        self.probeName = fromJson["probeName"] as! String
+        self.name = fromJson["name"] as? String
+        self.maxTemp = fromJson["maxTemp"] as? Double
+        self.maxTemp = fromJson["minTemp"] as? Double
     }
 }
 
 
 
 
+
 final class TempController {
+    let wrongTemperature: Double = 1000
     static let sharedInstance = TempController()
     var timer: NewTimer?
     var probes: [Thermometer] = []
     let probeDirectory = "/sys/bus/w1/devices/"
     
-    init() {
-        self.probes.append(Thermometer(probeName: "probeName1", name: "meno1"))
-        self.probes.append(Thermometer(probeName: "probeName2", name: "meno2"))
-    }
-    
     
     func setLoopForMeasurments(withIntervalInMinutes interval: Double = 5) {
         try? self.timer?.cancel()
-
+        
         let time = interval * 60
         
         self.timer = NewTimer.init(interval: time, handler: { (timer) in
-            
-            
+            self.readTempsFromAllThermometers()
         }, repeats: false)
         try? self.timer?.start()
     }
-
+    
     func readTempsFromAllThermometers() {
+        self.loadProbesFromConfig()
         var measurment = [String: Double]()
         for probe in self.probes {
             guard probe.name != nil else {continue}
             let temp = self.readProbe(name: probe.probeName)
-            guard temp != 1000 else {continue}
+            guard temp != wrongTemperature else {continue}
+            
             measurment[probe.name!] = temp
-            guard probe.maxTemp != nil else {continue}
+            self.checkForNotification(probe: probe, temp: temp)
+            
+        }
+    }
+    
+    func checkForNotification(probe: Thermometer, temp: Double) {
+        if probe.maxTemp != nil {
             if temp > probe.maxTemp! {
                 let _ = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Vysoka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
             }
-            guard probe.minTemp != nil else {continue}
+        }
+        if probe.minTemp != nil {
             if temp > probe.minTemp! {
                 let _ = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Nizka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
             }
@@ -115,13 +123,24 @@ final class TempController {
         if let tempS = outval.split(byString:"t=").last, let t = Double(tempS.trim()) {
             temp = Double(t)/1000.0
         } else {
-            temp = 1000
+            temp = wrongTemperature
         }
         
         return Double(temp)
     }
     
-
+    func setConnectedThermometers() -> Int{
+        let found = self.findConnectedThermometers()
+        for probe in found {
+            if !self.probes.contains(where: { (thermo) -> Bool in
+                return thermo.probeName == probe!
+            }) {
+                self.probes.append(Thermometer(probeName: probe!, name: nil))
+            }
+        }
+        self.writeProbesToConfig()
+        return found.count
+    }
     
     func findConnectedThermometers() -> [String?]{
         let fileManager = FileManager.default
@@ -137,26 +156,20 @@ final class TempController {
     }
     
     func loadProbesFromConfig() {
-        if let configRoute: URL = URL(string: "file://" + drop.workDir.finished(with: "/") + "Config/thermoProbes.json") {
-            if let config = try? Data.init(contentsOf: configRoute) {
-                if let probeArray = try? JSONSerialization.jsonObject(with: config, options: []) as? [[String: String]] {
-                    for ar in probeArray! {
-                        self.probes.append(Thermometer.init(fromJson: ar))
-                    }
-                    debugPrint(self.probes)
-                }
+        if let prArr = ConfigManager.sharedInstance.config["probes"] as? [[String: AnyObject]]{
+            for pr in prArr {
+                self.probes.append(Thermometer.init(fromJson: pr))
             }
         }
     }
     
     func writeProbesToConfig() {
-        if let configRoute: URL = URL(string: drop.workDir.finished(with: "/") + "Config/thermoProbes.json") {
-            let js = self.probes.map { (th) -> [String: String] in
-                th.toJson()
-            }
-            let data = try? JSONSerialization.data(withJSONObject: js, options: .prettyPrinted)
-            try? data?.write(to: configRoute)
-        }
+        let js = self.probes.map({ (th) -> [String: AnyObject] in
+            th.toJson()
+        }) as AnyObject
+        
+        ConfigManager.sharedInstance.writeToConfig(object: js, forKey: "probes")
+        
     }
     
 }

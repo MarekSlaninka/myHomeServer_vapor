@@ -13,24 +13,32 @@ let gate = GateController(_drop: drop)
 TempController.sharedInstance.writeProbesToConfig()
 TempController.sharedInstance.loadProbesFromConfig()
 
-_ = ConfigManager().getConfigFile()
+let config = ConfigManager()
 
-drop.get("hello") { request in
-    let name = request.data["name"]?.string ?? "stranger"
-    return name
-}
 
-drop.get("/tomas") { _ in
-    return "Hello Tomas"
-}
 #if os(Linux)
+
 drop.get("/openGate") { _ in
     
     gate.setTimer()
     return gate.openGate()
     
 }
+    
 #endif
+
+
+drop.get("/loadThermometers") { _ in
+    return try JSON(node: ["count": TempController.sharedInstance.setConnectedThermometers()])
+}
+
+drop.get("/getConfig") { _ in
+    let ret = try? JSONSerialization.data(withJSONObject: ConfigManager.sharedInstance.config, options: JSONSerialization.WritingOptions.prettyPrinted).string()
+
+    return ret ?? "nevydalo"
+}
+
+
 
 drop.get("/temp") { _ in
     do {
@@ -44,6 +52,16 @@ drop.get("/temp") { _ in
 
 
 
+
+drop.post("/setConfig") { request in
+    debugPrint(request.data["probes"]?.array?.first)
+    
+    
+    
+    return "vydalo"
+}
+
+
 //Timer test WORK
 drop.get("timer",":time") { request in
     var time: Double = 2
@@ -52,7 +70,7 @@ drop.get("timer",":time") { request in
     }
     let timer = NewTimer.init(interval: time, handler: { (timer) in
         drop.console.print("timer after \(time)", newLine: true)
-
+        
     }, repeats: false)
     try? timer.start()
     
@@ -66,7 +84,7 @@ drop.get("/notif") { _ in
     } else {
         return "nevydalo"
     }
-//    return "poslana notifikacia, dufam :D"
+    //    return "poslana notifikacia, dufam :D"
 }
 
 
