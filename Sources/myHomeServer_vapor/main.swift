@@ -13,7 +13,7 @@ let gate = GateController(_drop: drop)
 TempController.sharedInstance.writeProbesToConfig()
 TempController.sharedInstance.loadProbesFromConfig()
 
-ConfigManager().getConfigFile()
+_ = ConfigManager().getConfigFile()
 
 drop.get("hello") { request in
     let name = request.data["name"]?.string ?? "stranger"
