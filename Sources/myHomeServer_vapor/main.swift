@@ -8,12 +8,12 @@ let gate = GateController(_drop: drop)
 #endif
 
 
-
-
-TempController.sharedInstance.writeProbesToConfig()
-TempController.sharedInstance.loadProbesFromConfig()
-
 let config = ConfigManager()
+
+
+//TempController.sharedInstance.writeProbesToConfig()
+//TempController.sharedInstance.loadProbesFromConfig()
+
 
 
 #if os(Linux)
