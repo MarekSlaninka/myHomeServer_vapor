@@ -42,12 +42,18 @@ class ConfigManager: NSObject {
     
     func saveConfigToPlist() {
         drop.console.print(self.plistPath + self.plistName, newLine: true)
-
-        if let data = try? JSONSerialization.data(withJSONObject: self.config, options: JSONSerialization.WritingOptions.prettyPrinted) {
-//        let data = try? PropertyListSerialization.data(fromPropertyList: self.config as? Any, format: self.propertyListForamt, options: 0)
+        var data: Data?
+        do {
+            data = try JSONSerialization.data(withJSONObject: self.config, options: JSONSerialization.WritingOptions.prettyPrinted)
+            //        let data = try? PropertyListSerialization.data(fromPropertyList: self.config as? Any, format: self.propertyListForamt, options: 0)
             drop.console.print(self.plistPath + self.plistName, newLine: true)
+        }catch {
+            drop.console.print("serializationh error :" + (error as! String))
+        }
+        
+        if data != nil {
             do {
-                try data.write(to: URL(string:self.plistPath + self.plistName)!)
+                try data?.write(to: URL(string:self.plistPath + self.plistName)!)
             }catch {
                 drop.console.print(error as! String)
             }
