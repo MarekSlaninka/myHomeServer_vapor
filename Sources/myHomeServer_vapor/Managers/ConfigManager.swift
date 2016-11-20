@@ -8,6 +8,7 @@
 
 import Foundation
 import Vapor
+import Jay
 
 class ConfigManager: NSObject {
     static let sharedInstance: ConfigManager = ConfigManager()
@@ -42,22 +43,27 @@ class ConfigManager: NSObject {
     
     func saveConfigToPlist() {
         drop.console.print(self.plistPath + self.plistName, newLine: true)
-        var data: Data?
-        do {
-            data = try JSONSerialization.data(withJSONObject: self.config, options: JSONSerialization.WritingOptions.prettyPrinted)
-            //        let data = try? PropertyListSerialization.data(fromPropertyList: self.config as? Any, format: self.propertyListForamt, options: 0)
-            drop.console.print(self.plistPath + self.plistName, newLine: true)
-        }catch {
-            drop.console.print("serializationh error :" + (error as! String))
-        }
+        let data = try? Jay(formatting: .prettified).dataFromJson(any: self.config) // [UInt8]
+
+        try? Data.init(bytes: data!).write(to: URL(string:self.plistPath + self.plistName)!)
+
         
-        if data != nil {
-            do {
-                try data?.write(to: URL(string:self.plistPath + self.plistName)!)
-            }catch {
-                drop.console.print(error as! String)
-            }
-        }
+        
+//        do {
+//            data = try JSONSerialization.data(withJSONObject: self.config, options: JSONSerialization.WritingOptions.prettyPrinted)
+//            //        let data = try? PropertyListSerialization.data(fromPropertyList: self.config as? Any, format: self.propertyListForamt, options: 0)
+//            drop.console.print(self.plistPath + self.plistName, newLine: true)
+//        }catch {
+//            drop.console.print("serializationh error :" + (error as! String))
+//        }
+//        
+//        if data != nil {
+//            do {
+//                try data?.write(to: URL(string:self.plistPath + self.plistName)!)
+//            }catch {
+//                drop.console.print(error as! String)
+//            }
+//        }
     }
     
     func writeToConfig(object: Any, forKey key: String) {

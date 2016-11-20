@@ -16,20 +16,20 @@ import JSON
 struct Thermometer {
     var probeName: String
     var name: String?
-    var maxTemp: Double?
-    var minTemp: Double?
+    var maxTemp: Double = 1000
+    var minTemp: Double = -1000
     
     init(probeName: String, name: String?) {
         self.probeName = probeName
         self.name = name
     }
     
-    func toJson() -> [String: Any?]{
+    func toJson() -> [String: Any]{
         drop.console.print("debug 1", newLine: true)
         let sl  =  ["probeName": probeName,
-                    "name": name ?? "" ,
-                    "maxTemp": maxTemp ?? nil ,
-                    "minTemp": minTemp ?? nil ] as [String : Any]
+                    "name": name ?? "",
+                    "maxTemp": maxTemp ,
+                    "minTemp": minTemp ] as [String : Any]
         drop.console.print("debug 2", newLine: true)
         
         return sl
@@ -39,8 +39,8 @@ struct Thermometer {
     init(fromJson: [String: AnyObject]){
         self.probeName = fromJson["probeName"] as! String
         self.name = fromJson["name"] as? String
-        self.maxTemp = fromJson["maxTemp"] as? Double
-        self.maxTemp = fromJson["minTemp"] as? Double
+        self.maxTemp = (fromJson["maxTemp"] as? Double)!
+        self.maxTemp = (fromJson["minTemp"] as? Double)!
     }
 }
 
@@ -82,16 +82,14 @@ final class TempController {
     }
     
     func checkForNotification(probe: Thermometer, temp: Double) {
-        if probe.maxTemp != nil {
-            if temp > probe.maxTemp! {
+            if temp > probe.maxTemp {
                 let _ = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Vysoka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
             }
-        }
-        if probe.minTemp != nil {
-            if temp > probe.minTemp! {
+        
+            if temp > probe.minTemp {
                 let _ = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Nizka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
             }
-        }
+        
     }
     
     func getTemp() -> String {
@@ -166,11 +164,11 @@ final class TempController {
     }
     
     func writeProbesToConfig() {
-        let js = self.probes.map({ (th) -> [String: Any?] in
+        let js = self.probes.map({ (th) -> [String: Any] in
             th.toJson()
         })
         
-        ConfigManager.sharedInstance.writeToConfig(object: js as Any, forKey: "probes")
+        ConfigManager.sharedInstance.writeToConfig(object: js , forKey: "probes")
         
     }
     
