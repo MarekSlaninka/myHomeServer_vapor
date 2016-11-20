@@ -4,7 +4,7 @@ import Dispatch
 
 let drop = Droplet()
 #if os(Linux)
-let gate = GateController(_drop: drop)
+//let gate = GateController(_drop: drop)
 #endif
 
 
