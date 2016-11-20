@@ -41,6 +41,8 @@ class ConfigManager: NSObject {
     }
     
     func saveConfigToPlist() {
+        drop.console.print(self.plistPath + self.plistName, newLine: true)
+
         if let data = try? JSONSerialization.data(withJSONObject: self.config, options: JSONSerialization.WritingOptions.prettyPrinted) {
 //        let data = try? PropertyListSerialization.data(fromPropertyList: self.config as? Any, format: self.propertyListForamt, options: 0)
             drop.console.print(self.plistPath + self.plistName, newLine: true)
