@@ -25,11 +25,12 @@ struct Thermometer {
     }
     
     func toJson() -> [String: Any?]{
+        drop.console.print("debug 1", newLine: true)
         let sl  =  ["probeName": probeName,
                     "name": name ?? "" ,
                     "maxTemp": maxTemp ?? nil ,
                     "minTemp": minTemp ?? nil ] as [String : Any]
-        
+        drop.console.print("debug 2", newLine: true)
         
         return sl
         
