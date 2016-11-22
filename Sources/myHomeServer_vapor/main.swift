@@ -18,12 +18,12 @@ let config = ConfigManager()
 
 #if os(Linux)
 
-drop.get("/openGate") { _ in
-    
-    gate.setTimer()
-    return gate.openGate()
-    
-}
+//drop.get("/openGate") { _ in
+//    
+//    gate.setTimer()
+//    return gate.openGate()
+//    
+//}
     
 #endif
 
