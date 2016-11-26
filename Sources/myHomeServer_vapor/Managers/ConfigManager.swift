@@ -27,27 +27,14 @@ class ConfigManager: NSObject {
     func loadPropertyList() {
         drop.console.print("debug load 1", newLine: true)
         if let data = try? Data.init(contentsOf: URL(string: self.plistPath + self.plistName)!) {
-            drop.console.print("debug load 2"+data.description, newLine: true)
             if let config = try? Jay().anyJsonFromData([UInt8](data)) {
-                drop.console.print("debug load 3", newLine: true)
                 if let cf = config as? [String: Any] {
-                    drop.console.print("debug load 4"+cf.description, newLine: true)
+                    self.config = cf
                 }
             }
             
             
         }
-//        
-//        var plistData: [String: AnyObject] = [:] //Our data
-//        if let plistXML = try? Data.init(contentsOf: URL(string: self.plistPath + self.plistName)!) {
-//            do {//convert the data to a dictionary and handle errors.
-//                plistData = try PropertyListSerialization.propertyList(from: plistXML, options: [], format: &self.propertyListForamt) as! [String:AnyObject]
-//                self.config = plistData
-//                self.lastChange = plistData["lastChange"] as? Date
-//            } catch {
-//                print("Error reading plist: \(error), format: \(propertyListForamt)")
-//            }
-//        }
     }
     
     func saveConfigToPlist() {
@@ -65,6 +52,10 @@ class ConfigManager: NSObject {
         
         
         return nil
+    }
+    
+    func getConfig() -> [String: Any] {
+        return self.config
     }
     
     

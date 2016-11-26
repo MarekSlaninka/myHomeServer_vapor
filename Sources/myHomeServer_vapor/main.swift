@@ -33,9 +33,9 @@ drop.get("/loadThermometers") { _ in
 }
 
 drop.get("/getConfig") { _ in
-    let ret = try? JSONSerialization.data(withJSONObject: ConfigManager.sharedInstance.config, options: JSONSerialization.WritingOptions.prettyPrinted).string()
+    let ret = ConfigManager.sharedInstance.getConfig().description
 
-    return ret ?? "nevydalo"
+    return ret 
 }
 
 
