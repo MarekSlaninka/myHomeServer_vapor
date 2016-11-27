@@ -41,11 +41,12 @@ class ConfigManager: NSObject {
         drop.console.print(self.plistPath + self.plistName, newLine: true)
         drop.console.print("debug saveConfigToPlist 1", newLine: true)
 
-        let data = try? Jay(formatting: .prettified).dataFromJson(any: self.config) // [UInt8]
+        if let data = try? Jay(formatting: .prettified).dataFromJson(any: self.config) {// [UInt8]
         drop.console.print("debug saveConfigToPlist 2", newLine: true)
 
-        try? Data.init(bytes: data!).write(to: URL(string:self.plistPath + self.plistName)!)
+        try? Data.init(bytes: data).write(to: URL(string:self.plistPath + self.plistName)!)
         drop.console.print("debug saveConfigToPlist 3", newLine: true)
+        }
 
     }
     
