@@ -1,6 +1,7 @@
 import Vapor
 import Foundation
 import Dispatch
+import Jay
 
 let drop = Droplet()
 #if os(Linux)
@@ -33,9 +34,11 @@ drop.get("/loadThermometers") { _ in
 }
 
 drop.get("/getConfig") { _ in
-    let ret = ConfigManager.sharedInstance.getConfig().description
-
-    return ret 
+    let data = try? Jay(formatting: .prettified).dataFromJson(any: ConfigManager.sharedInstance.getConfig()) // [UInt8]
+    if let string = try? data?.string() {
+        return string!
+    }
+    return "nevydalo"
 }
 
 
