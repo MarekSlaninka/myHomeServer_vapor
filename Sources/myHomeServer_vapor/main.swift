@@ -65,11 +65,20 @@ drop.post("/setTempConfig") { request in
     if let arr = request.data["probes"]?.array {
         for pr in arr {
             var probe: [String: Any] = [
-                "maxTemp": pr.object!["maxTemp"]?.double!,
-                "minTemp": pr.object!["minTemp"]?.double!,
                 "name": pr.object!["name"]!.string!,
                 "probeName": pr.object!["probeName"]!.string!
             ]
+            
+            if let min = pr.object!["minTemp"]?.double {
+                probe["minTemp"] = min
+            } else {
+                probe["minTemp"] = -1000
+            }
+            if let max = pr.object!["maxTemp"]?.double {
+                probe["maxTemp"] = max
+            } else {
+                probe["maxTemp"] = 1000
+            }
             probes.append(probe)
         }
     }
