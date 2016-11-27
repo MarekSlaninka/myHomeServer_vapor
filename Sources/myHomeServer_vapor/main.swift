@@ -73,9 +73,11 @@ drop.post("/setTempConfig") { request in
             probes.append(probe)
         }
     }
-    
+    drop.console.print("debug save 1", newLine: true)
+
     ConfigManager.sharedInstance.writeToConfig(object: probes, forKey: "probes")
-    
+    drop.console.print("debug save 2", newLine: true)
+
     
     let response = Response(status: .ok, body: "Okay")
 

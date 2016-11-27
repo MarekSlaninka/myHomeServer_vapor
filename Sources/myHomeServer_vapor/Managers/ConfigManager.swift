@@ -29,22 +29,32 @@ class ConfigManager: NSObject {
         if let data = try? Data.init(contentsOf: URL(string: self.plistPath + self.plistName)!) {
             if let config = try? Jay().anyJsonFromData([UInt8](data)) {
                 if let cf = config as? [String: Any] {
+                    drop.console.print("debug load 2", newLine: true)
+
                     self.config = cf
                 }
             }
-            
-            
         }
     }
     
     func saveConfigToPlist() {
         drop.console.print(self.plistPath + self.plistName, newLine: true)
+        drop.console.print("debug saveConfigToPlist 1", newLine: true)
+
         let data = try? Jay(formatting: .prettified).dataFromJson(any: self.config) // [UInt8]
+        drop.console.print("debug saveConfigToPlist 2", newLine: true)
+
         try? Data.init(bytes: data!).write(to: URL(string:self.plistPath + self.plistName)!)
+        drop.console.print("debug saveConfigToPlist 3", newLine: true)
+
     }
     
     func writeToConfig(object: Any, forKey key: String) {
+        drop.console.print("debug write 1", newLine: true)
+
         self.config[key] = object
+        drop.console.print("debug write 2", newLine: true)
+
         self.saveConfigToPlist()
     }
     
