@@ -2,10 +2,11 @@ import Vapor
 import Foundation
 import Dispatch
 import Jay
+import HTTP
 
 let drop = Droplet()
 #if os(Linux)
-//let gate = GateController(_drop: drop)
+    //let gate = GateController(_drop: drop)
 #endif
 
 
@@ -18,13 +19,13 @@ let config = ConfigManager()
 
 
 #if os(Linux)
-
-//drop.get("/openGate") { _ in
-//    
-//    gate.setTimer()
-//    return gate.openGate()
-//    
-//}
+    
+    //drop.get("/openGate") { _ in
+    //
+    //    gate.setTimer()
+    //    return gate.openGate()
+    //
+    //}
     
 #endif
 
@@ -38,7 +39,7 @@ drop.get("/getConfig") { _ in
     if let string = try? data?.string() {
         return string!
     }
-    return "nevydalo"
+    return Response(status: .badRequest, body: "Okay")
 }
 
 
@@ -56,12 +57,29 @@ drop.get("/temp") { _ in
 
 
 
-drop.post("/setConfig") { request in
-//    debugPrint(request.data["probes"]?.array?.first)
+drop.post("/setTempConfig") { request in
+    //    debugPrint(request.data["probes"]?.array?.first)
+    
+    var probes = [[String: Any]]()
+    
+    if let arr = request.data["probes"]?.array {
+        for pr in arr {
+            var probe: [String: Any] = [
+                "maxTemp": pr.object!["maxTemp"]?.double!,
+                "minTemp": pr.object!["minTemp"]?.double!,
+                "name": pr.object!["name"]!.string!,
+                "probeName": pr.object!["probeName"]!.string!
+            ]
+            probes.append(probe)
+        }
+    }
+    
+    ConfigManager.sharedInstance.writeToConfig(object: probes, forKey: "probes")
     
     
-    
-    return "vydalo"
+    let response = Response(status: .ok, body: "Okay")
+
+    return response
 }
 
 
