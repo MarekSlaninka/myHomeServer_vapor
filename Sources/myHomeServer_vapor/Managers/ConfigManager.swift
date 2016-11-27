@@ -40,6 +40,7 @@ class ConfigManager: NSObject {
     func saveConfigToPlist() {
         drop.console.print(self.plistPath + self.plistName, newLine: true)
         drop.console.print("debug saveConfigToPlist 1", newLine: true)
+        drop.console.print("debug saveConfigToPlist 1.5: \(self.config.description)", newLine: true)
 
         if let data = try? Jay(formatting: .prettified).dataFromJson(any: self.config) {// [UInt8]
         drop.console.print("debug saveConfigToPlist 2", newLine: true)
