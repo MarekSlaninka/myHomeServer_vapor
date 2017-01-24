@@ -1,14 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!--
-   Property List.plist
-   myHomeServer_vapor
-
-   Created by Marek Slaninka on 19.11.16.
-   Copyright (c) 2016 __MyCompanyName__. All rights reserved.
--->
-<plist version="1.0">
-    <dict>
-    
-    </dict>
-</plist>
+{
+    "probes": [
+        {
+            "maxTemp": 60,
+            "minTemp": -1000,
+            "name": "teplomer1",
+            "probeName": "28-021564f10eff"
+        },
+        {
+            "maxTemp": 60,
+            "minTemp": -1000,
+            "name": "teplomer2",
+            "probeName": "28-021564ce28ff"
+        }
+    ]
+}

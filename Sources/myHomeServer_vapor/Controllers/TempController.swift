@@ -13,35 +13,44 @@ import Console
 import Jay
 import JSON
 
-struct Thermometer {
+struct Thermometer: NodeRepresentable {
     var probeName: String
-    var name: String?
+    var name: String = ""
     var maxTemp: Double = 1000
     var minTemp: Double = -1000
     
-    init(probeName: String, name: String?) {
+    init(probeName: String, name: String) {
         self.probeName = probeName
         self.name = name
     }
     
-    func toJson() -> [String: Any]{
-        drop.console.print("debug 1", newLine: true)
-        let sl  =  ["probeName": probeName,
-                    "name": name ?? "",
-                    "maxTemp": maxTemp ,
-                    "minTemp": minTemp ] as [String : Any]
-        drop.console.print("debug 2", newLine: true)
-        
-        return sl
-        
-    }
+  //  func toJson() -> [String: Any]{
+  //      drop.console.print("debug 1", newLine: true)
+  //      let sl  =  ["probeName": probeName,
+  //                  "name": name ,
+  //                 "maxTemp": maxTemp ,
+  //                  "minTemp": minTemp ] as [String : Any]
+  //      drop.console.print("debug 2", newLine: true)
+  //
+  //      return sl
+  //  }
     
     init(fromJson: [String: AnyObject]){
         self.probeName = fromJson["probeName"] as! String
-        self.name = fromJson["name"] as? String
+        self.name = fromJson["name"] as! String
         self.maxTemp = (fromJson["maxTemp"] as? Double)!
         self.maxTemp = (fromJson["minTemp"] as? Double)!
     }
+    
+    func makeNode(context: Context) throws -> Node {
+        return try Node(node: ["probeName": probeName,
+                         "name": name,
+                         "maxTemp": maxTemp ,
+                         "minTemp": minTemp ])
+    }
+    
+    
+    
 }
 
 
@@ -75,7 +84,7 @@ final class TempController {
             let temp = self.readProbe(name: probe.probeName)
             guard temp != wrongTemperature else {continue}
             
-            measurment[probe.name!] = temp
+            measurment[probe.name] = temp
             self.checkForNotification(probe: probe, temp: temp)
             
         }
@@ -135,7 +144,7 @@ final class TempController {
             if !self.probes.contains(where: { (thermo) -> Bool in
                 return thermo.probeName == probe!
             }) {
-                self.probes.append(Thermometer(probeName: probe!, name: nil))
+                self.probes.append(Thermometer(probeName: probe!, name: ""))
             }
         }
         self.writeProbesToConfig()
@@ -164,11 +173,29 @@ final class TempController {
     }
     
     func writeProbesToConfig() {
-        let js = self.probes.map({ (th) -> [String: Any] in
-            th.toJson()
-        })
+        guard let js = try? JSON(node: self.probes.makeNode()) else {return}
+
         
         ConfigManager.sharedInstance.writeToConfig(object: js , forKey: "probes")
+    }
+    
+    func writeProbesToFirebase() {
+       // let js = self.probes.map({ (th) -> [String: Any] in
+       //     JSON(node: th)
+       // })
+        
+        guard let js = try? JSON(node: self.probes.makeNode()) else {return}
+ 
+        
+        if let data = try? Jay(formatting: .prettified).dataFromJson(any: js) {// [UInt8]
+            drop.console.print("debug saveConfigToPlist 2", newLine: true)
+            
+            try? Data.init(bytes: data).write(to: URL(string:ConfigManager.sharedInstance.plistPath + ConfigManager.sharedInstance.plistName)!)
+            
+            _ = try? drop.client.request(.post, "", query: ["probes": data.debugDescription])
+            
+            drop.console.print("debug saveConfigToPlist 3", newLine: true)
+        }
         
     }
     
