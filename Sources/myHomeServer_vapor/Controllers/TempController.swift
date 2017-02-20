@@ -129,6 +129,7 @@ final class TempController {
         drop.console.print("readTempsFromAllThermometers-mid", newLine: true)
 
         if self.saveTemperaturesIntoFirebase(temps: measurment) {
+            
             for var temp in measurment {
                 temp.setSyncedInFB(synced: true)
                 _ = temp.writeToDatabase()
@@ -234,7 +235,7 @@ final class TempController {
     }
     
     func saveTemperaturesIntoFirebase(temps: [MeasuredValue]) -> Bool {
-        drop.console.print("save temp to firebase \(temps.debugDescription)", newLine: true)
+//        drop.console.print("save temp to firebase \(temps.debugDescription)", newLine: true)
 
         guard let node = try? temps.makeNode() else {return false}
         let timeStamp: Int = Int(Date().timeIntervalSince1970)
