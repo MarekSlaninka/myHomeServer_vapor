@@ -182,6 +182,8 @@ final class TempController {
     }
     
     func setConnectedThermometers() -> Int{
+        drop.console.print("setConnectedThermometers", newLine: true)
+
         let found = self.findConnectedThermometers()
         var new:Bool = false
         for probe in found {
@@ -193,8 +195,12 @@ final class TempController {
             }
         }
         if new {
+            drop.console.print("setConnectedThermometers-new", newLine: true)
+
             self.writeProbesToFirebase()
         }
+        drop.console.print("setConnectedThermometers-end", newLine: true)
+
         return found.count
     }
     
