@@ -100,7 +100,7 @@ final class PinController {
                 pin.pinNumber == pinNumber
             }) else {return  Abort.custom(status: .badRequest, message: "Unknown pin number") as! ResponseRepresentable}
             if pin.secured {
-                guard let password = request.json?["password"]?.string else {return Abort.custom(status: .badRequest, message: "Wrong parameter password") as! ResponseRepresentable}
+                guard let _ = request.json?["password"]?.string else {return Abort.custom(status: .badRequest, message: "Wrong parameter password") as! ResponseRepresentable}
             }
             self.set(pin: pin, toState: Bool(state), completitionBlock: {
 //                return Response(status: .ok, body: "Okay")
@@ -119,7 +119,7 @@ final class PinController {
                 pin.pinNumber == pinNumber
             }) else {return  Abort.custom(status: .badRequest, message: "Unknown pin number") as! ResponseRepresentable}
             if pin.secured {
-                guard let password = request.json?["password"]?.string else {return Abort.custom(status: .badRequest, message: "Wrong parameter password") as! ResponseRepresentable}
+                guard let _ = request.json?["password"]?.string else {return Abort.custom(status: .badRequest, message: "Wrong parameter password") as! ResponseRepresentable}
             }
             pin.gpio?.value = pin.gpio?.value == 1 ? 0 : 1
             
