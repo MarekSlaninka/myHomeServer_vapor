@@ -13,6 +13,7 @@ import Console
 import Jay
 import JSON
 import Vapor
+import Jobs
 
 struct Thermometer: NodeRepresentable, NodeInitializable {
     var probeName: String
@@ -81,7 +82,7 @@ final class TempController {
     let probeDirectory = "/sys/bus/w1/devices/"
     private var probeConfigUrl: String = "probeConfig"
     
-    
+    var job: Job?
     
     
     func setLoopForMeasurments(withIntervalInMinutes interval: Double = 5) {
@@ -89,11 +90,22 @@ final class TempController {
     
         let time = interval * 60
         
+        
+        
         self.timer = NewTimer.init(interval: time, handler: { (timer) in
             self.readTempsFromAllThermometers()
         }, repeats: false)
         try? self.timer?.start()
     }
+    
+    func setJob(withIntervalInSeconds interval: Double = 5) {
+        self.job?.stop()
+        self.job = Jobs.add(interval: interval.seconds, action: {
+            self.readTempsFromAllThermometers()
+        })
+        self.job?.start()
+    }
+    
     
     func readTempsFromAllThermometers() {
         self.loadProbesFromFirebase()

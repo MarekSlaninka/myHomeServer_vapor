@@ -16,10 +16,13 @@ let drop = Droplet()
 
 //
 //let config = ConfigManager()
-let tempController = TempController.sharedInstance
+let tempController = TempController()
+let pinController = PinController()
 let firebaseManager = FirebaseController(url: Config().firebaseBaseUrl, key: "")
 let notificationManager = PushNotificationsManager.sharedInstance
 notificationManager.addRoutes(drop: drop)
+pinController.addRoutes(drop: drop)
+tempController.setJob(withIntervalInSeconds: 300)
 //
 //
 //tempController.readTempsFromAllThermometers()
