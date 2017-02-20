@@ -90,12 +90,15 @@ final class TempController {
     
         let time = interval * 60
         
-        
+        self.readTempsFromAllThermometers()
+
         
         self.timer = NewTimer.init(interval: time, handler: { (timer) in
+            drop.console.print("timer fired", newLine: true)
             self.readTempsFromAllThermometers()
         }, repeats: false)
         try? self.timer?.start()
+        
     }
     
     func setJob(withIntervalInSeconds interval: Double = 5) {
@@ -205,6 +208,8 @@ final class TempController {
     }
     
     func loadProbesFromConfig() {
+        drop.console.print("loadProbesFromConfig", newLine: true)
+
         if let prArr = ConfigManager.sharedInstance.config["probes"] as? [[String: AnyObject]]{
             for pr in prArr {
                 self.probes.append(Thermometer.init(fromJson: pr))
@@ -221,6 +226,8 @@ final class TempController {
     }
     
     func loadProbesFromFirebase() {
+        drop.console.print("loadProbesFromFirebase", newLine: true)
+
         let json = firebaseManager.loadFromFirebase(route: Config().probeConfigUrl + ".json")
         guard let nodes: [Node] = try! json?.extract()  else {self.loadProbesFromConfig(); return}
         var probes: [Thermometer] = [Thermometer]()
@@ -238,7 +245,7 @@ final class TempController {
     func writeProbesToConfig() {
         guard let js = try? JSON(node: self.probes.makeNode()) else {return}
         ConfigManager.sharedInstance.writeToConfig(object: js , forKey: "probes")
-        self.writeProbesToFirebase()
+//        self.writeProbesToFirebase()
     }
     
     func writeProbesToFirebase() {
