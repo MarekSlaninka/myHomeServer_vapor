@@ -183,14 +183,18 @@ final class TempController {
     
     func setConnectedThermometers() -> Int{
         let found = self.findConnectedThermometers()
+        var new:Bool = false
         for probe in found {
             if !self.probes.contains(where: { (thermo) -> Bool in
                 return thermo.probeName == probe!
             }) {
                 self.probes.append(Thermometer(probeName: probe!, name: ""))
+                new = true
             }
         }
-        self.writeProbesToFirebase()
+        if new {
+            self.writeProbesToFirebase()
+        }
         return found.count
     }
     
@@ -218,7 +222,8 @@ final class TempController {
     }
     
     func saveTemperaturesIntoFirebase(temps: [MeasuredValue]) -> Bool {
-        
+        drop.console.print("save temp to firebase \(temps.debugDescription)", newLine: true)
+
         guard let node = try? temps.makeNode() else {return false}
         let timeStamp: Int = Int(Date().timeIntervalSince1970)
         return firebaseManager.saveToFirebase(node: node, route: Config().tempSaveUrl + "/\(timeStamp).json")
