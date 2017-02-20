@@ -12,8 +12,9 @@ import HTTP
 import Console
 import Jay
 import JSON
+import Vapor
 
-struct Thermometer: NodeRepresentable {
+struct Thermometer: NodeRepresentable, NodeInitializable {
     var probeName: String
     var name: String = ""
     var maxTemp: Double = 1000
@@ -48,12 +49,27 @@ struct Thermometer: NodeRepresentable {
                          "maxTemp": maxTemp ,
                          "minTemp": minTemp ])
     }
-    
+  
+    init(node: Node, in context: Context) throws {
+        self.probeName = try node.extract("probeName")
+        self.name = try node.extract("name")
+        self.maxTemp = try node.extract("maxTemp")
+        self.minTemp = try node.extract("minTemp")
+    }
     
     
 }
 
 
+//struct Temperature: NodeRepresentable {
+//    var temperature: Double
+//    var name: String
+//    
+//    func makeNode(context: Context) throws -> Node {
+//        return try Node(node: [ "temperature": temperature,
+//                                "name": name ])
+//    }
+//}
 
 
 
@@ -63,11 +79,14 @@ final class TempController {
     var timer: NewTimer?
     var probes: [Thermometer] = []
     let probeDirectory = "/sys/bus/w1/devices/"
+    private var probeConfigUrl: String = "probeConfig"
+    
+    
     
     
     func setLoopForMeasurments(withIntervalInMinutes interval: Double = 5) {
         try? self.timer?.cancel()
-        
+    
         let time = interval * 60
         
         self.timer = NewTimer.init(interval: time, handler: { (timer) in
@@ -77,16 +96,27 @@ final class TempController {
     }
     
     func readTempsFromAllThermometers() {
-        self.loadProbesFromConfig()
-        var measurment = [String: Double]()
+        self.loadProbesFromFirebase()
+        _ = self.setConnectedThermometers()
+        var measurment = [MeasuredValue]()
         for probe in self.probes {
-            guard probe.name != nil else {continue}
+            guard probe.name != "" else { continue}
             let temp = self.readProbe(name: probe.probeName)
             guard temp != wrongTemperature else {continue}
-            
-            measurment[probe.name] = temp
+            let temperature: MeasuredValue = MeasuredValue(value: temp, valueType: .Temp, time: Date(), probe: probe.name)
+            measurment.append(temperature)
             self.checkForNotification(probe: probe, temp: temp)
-            
+        }
+        if self.saveTemperaturesIntoFirebase(temps: measurment) {
+            for var temp in measurment {
+                temp.setSyncedInFB(synced: true)
+                _ = temp.writeToDatabase()
+            }
+        } else {
+            for var temp in measurment {
+                temp.setSyncedInFB(synced: false)
+                _ = temp.writeToDatabase()
+            }
         }
     }
     
@@ -94,11 +124,9 @@ final class TempController {
             if temp > probe.maxTemp {
                 let _ = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Vysoka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
             }
-        
-            if temp > probe.minTemp {
+            if temp < probe.minTemp {
                 let _ = PushNotificationsManager.sharedInstance.sendNotification(withTitle: "Nizka teplota", body: "Pozor na teplomery \(probe.name) je teplota \(temp)°C", completitionBlock: nil, drop: drop)
             }
-        
     }
     
     func getTemp() -> String {
@@ -147,7 +175,7 @@ final class TempController {
                 self.probes.append(Thermometer(probeName: probe!, name: ""))
             }
         }
-        self.writeProbesToConfig()
+        self.writeProbesToFirebase()
         return found.count
     }
     
@@ -172,31 +200,41 @@ final class TempController {
         }
     }
     
+    func saveTemperaturesIntoFirebase(temps: [MeasuredValue]) -> Bool {
+        
+        guard let node = try? temps.makeNode() else {return false}
+        let timeStamp: Int = Int(Date().timeIntervalSince1970)
+        return firebaseManager.saveToFirebase(node: node, route: Config().tempSaveUrl + "/\(timeStamp).json")
+
+    }
+    
+    func loadProbesFromFirebase() {
+        let json = firebaseManager.loadFromFirebase(route: Config().probeConfigUrl + ".json")
+        guard let nodes: [Node] = try! json?.extract()  else {self.loadProbesFromConfig(); return}
+        var probes: [Thermometer] = [Thermometer]()
+        for node in nodes {
+            guard let probe = try? node.converted() as Thermometer else {continue}
+            probes.append(probe)
+        }
+        if probes.count == 0 {
+            self.loadProbesFromConfig()
+        } else {
+            self.probes = probes
+        }
+    }
+    
     func writeProbesToConfig() {
         guard let js = try? JSON(node: self.probes.makeNode()) else {return}
-
-        
         ConfigManager.sharedInstance.writeToConfig(object: js , forKey: "probes")
+        self.writeProbesToFirebase()
     }
     
     func writeProbesToFirebase() {
-       // let js = self.probes.map({ (th) -> [String: Any] in
-       //     JSON(node: th)
-       // })
-        
-        guard let js = try? JSON(node: self.probes.makeNode()) else {return}
- 
-        
-        if let data = try? Jay(formatting: .prettified).dataFromJson(any: js) {// [UInt8]
-            drop.console.print("debug saveConfigToPlist 2", newLine: true)
-            
-            try? Data.init(bytes: data).write(to: URL(string:ConfigManager.sharedInstance.plistPath + ConfigManager.sharedInstance.plistName)!)
-            
-            _ = try? drop.client.request(.post, "", query: ["probes": data.debugDescription])
-            
-            drop.console.print("debug saveConfigToPlist 3", newLine: true)
-        }
-        
+        self.writeProbesToConfig()
+        guard let probes: Node = try? self.probes.makeNode() else {return}
+        _ = firebaseManager.saveToFirebase(node: probes, route: Config().probeConfigUrl + ".json")
     }
-    
 }
+
+
+
