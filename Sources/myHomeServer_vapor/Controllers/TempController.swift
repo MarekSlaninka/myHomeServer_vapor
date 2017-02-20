@@ -113,8 +113,12 @@ final class TempController {
     func readTempsFromAllThermometers() {
         self.loadProbesFromFirebase()
         _ = self.setConnectedThermometers()
+        drop.console.print("readTempsFromAllThermometers-start", newLine: true)
+
         var measurment = [MeasuredValue]()
         for probe in self.probes {
+            drop.console.print("readTempsFromAllThermometers \(probe)", newLine: true)
+
             guard probe.name != "" else { continue}
             let temp = self.readProbe(name: probe.probeName)
             guard temp != wrongTemperature else {continue}
@@ -122,6 +126,8 @@ final class TempController {
             measurment.append(temperature)
             self.checkForNotification(probe: probe, temp: temp)
         }
+        drop.console.print("readTempsFromAllThermometers-mid", newLine: true)
+
         if self.saveTemperaturesIntoFirebase(temps: measurment) {
             for var temp in measurment {
                 temp.setSyncedInFB(synced: true)
