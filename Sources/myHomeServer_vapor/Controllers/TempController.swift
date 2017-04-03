@@ -96,7 +96,7 @@ final class TempController {
         self.timer = NewTimer.init(interval: time, handler: { (timer) in
             drop.console.print("timer fired", newLine: true)
             self.readTempsFromAllThermometers()
-        }, repeats: false)
+        }, repeats: true)
         try? self.timer?.start()
         
     }
