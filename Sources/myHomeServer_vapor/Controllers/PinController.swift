@@ -125,10 +125,10 @@ final class PinController {
             if pin.secured {
                 guard let _ = data["password"]?.string else {return Response(status: .badRequest, body:  "Wrong parameter password") }
             }
-            pin.gpio?.value = pin.gpio?.value == 1 ? 0 : 1
+            pin.gpio?.value = 1//pin.gpio?.value == 1 ? 0 : 1
             
             Jobs.oneoff(delay: time.seconds) {
-                pin.gpio?.value = pin.gpio?.value == 1 ? 0 : 1
+                pin.gpio?.value = 0//pin.gpio?.value == 1 ? 0 : 1
             }
             
             return try! Response(status: .ok, body: JSON(node: ["value": pin.gpio!.value]))
