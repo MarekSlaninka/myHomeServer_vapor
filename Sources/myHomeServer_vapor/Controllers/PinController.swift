@@ -93,9 +93,9 @@ final class PinController {
         
         //Set Pin to state
         pinGroup.post("set") { request in
-            
-            guard let pinNumber = request.json?["pinNumber"]?.int else {return Abort.custom(status: .badRequest, message: "Wrong parameter pinNumber") as! ResponseRepresentable}
-            guard let state = request.json?["state"]?.int else {return Abort.custom(status: .badRequest, message: "Wrong parameter state") as! ResponseRepresentable}
+            drop.console.print(request.description, newLine: true)
+            guard let pinNumber = request.json?["pinNumber"]?.int else {return Response(status: .badRequest, body: "Wrong parameter pinNumber")}
+            guard let state = request.json?["state"]?.int else {return Response(status: .badRequest, body: "Wrong parameter state") }
             
             guard let pin = self.pins.first(where: { (pin) -> Bool in
                 pin.pinNumber == pinNumber
@@ -111,9 +111,9 @@ final class PinController {
         
         
         pinGroup.post("impulse") { request in
-            
-            guard let pinNumber = request.json?["pinNumber"]?.int else {return Abort.custom(status: .badRequest, message: "Wrong parameter pinNumber") as! ResponseRepresentable}
-            guard let time = request.json?["time"]?.int else {return Abort.custom(status: .badRequest, message: "Wrong parameter state") as! ResponseRepresentable}
+            drop.console.print(request.description, newLine: true)
+            guard let pinNumber = request.json?["pinNumber"]?.int else {return Response(status: .badRequest, body: "Wrong parameter pinNumber")}
+            guard let time = request.json?["time"]?.int else {return Response(status: .badRequest, body: "Wrong parameter state") }
 //            guard let state = request.json?["state"]?.int else {return Abort.custom(status: .badRequest, message: "Wrong parameter state") as! ResponseRepresentable}
             
             guard let pin = self.pins.first(where: { (pin) -> Bool in
