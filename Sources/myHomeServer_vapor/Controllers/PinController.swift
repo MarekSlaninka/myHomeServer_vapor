@@ -19,8 +19,8 @@ extension Bool {
 }
 
 
-enum PinType: String {
-    case switcher
+enum PinType: Int {
+    case switcher = 0
     case impulser
 }
 
