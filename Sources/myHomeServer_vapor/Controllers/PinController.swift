@@ -57,7 +57,7 @@ struct Pin: NodeRepresentable, NodeInitializable {
         secured = try node.extract("secured")
         name = try node.extract("name")
 //        direction = try GPIODirection(rawValue: node.extract("direction"))
-        
+        direction = GPIODirection.OUT
     }
     
     func makeNode(context: Context) throws -> Node {
@@ -145,6 +145,9 @@ final class PinController {
     
     func set(pin: Pin,toState state: Bool, completitionBlock: @escaping (()->())) {
 //        guard pin.type == .switcher else {return}
+        pin.gpio?.direction = .OUT
+        pin.gpio?.value = state.int!
+        
         completitionBlock()
     }
     
