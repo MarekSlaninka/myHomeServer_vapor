@@ -39,6 +39,7 @@ struct Pin: NodeRepresentable, NodeInitializable {
             }
         }
     }
+    
     var gpio: GPIO?
     
     init(name: String?, pinNumber: Int, type: PinType, secured: Bool) {

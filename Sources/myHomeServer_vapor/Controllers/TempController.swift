@@ -101,6 +101,16 @@ final class TempController {
         
     }
     
+    func stopLoop() -> Bool{
+        if self.timer != nil {
+            try? self.timer?.cancel()
+            return true
+        } else {
+            return true
+        }
+        return false
+    }
+    
     func setJob(withIntervalInSeconds interval: Double = 5) {
         self.job?.stop()
         self.job = Jobs.add(interval: interval.seconds, action: {

@@ -19,6 +19,7 @@ let drop = Droplet()
 let firebaseManager = FirebaseController(url: Config().firebaseBaseUrl, key: "")
 let tempController = TempController()
 let pinController = PinController()
+pinController.loadPinsConfigFromFirebase()
 let notificationManager = PushNotificationsManager.sharedInstance
 notificationManager.addRoutes(drop: drop)
 pinController.addRoutes(drop: drop)
@@ -31,6 +32,14 @@ tempController.setLoopForMeasurments(withIntervalInMinutes: 1)
 //
 try drop.addProvider(VaporSQLite.Provider.self)
 
+drop.get("stopmeasuring") { request in
+    return try JSON(node: ["ok": tempController.stopLoop()])
+}
+
+drop.get("startmeasuring") { request in
+    tempController.setLoopForMeasurments()
+    return try JSON(node: ["ok": true])
+}
 
 drop.get("measuredValues","afterDate", Int.self) { request, date in
     let result = try drop.database?.driver.raw("SELECT value, value_type, time, probe FROM MeasuredData WHERE time > \(date);")
