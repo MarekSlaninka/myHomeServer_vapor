@@ -56,7 +56,7 @@ struct Pin: NodeRepresentable, NodeInitializable {
         state = try node.extract("state")
         secured = try node.extract("secured")
         name = try node.extract("name")
-        direction = try GPIODirection(rawValue: node.extract("direction"))
+//        direction = try GPIODirection(rawValue: node.extract("direction"))
         
     }
     
@@ -87,40 +87,43 @@ final class PinController {
             if self.loadPinsConfigFromFirebase() {
                 return Response(status: .ok, body: "Okay")
             } else {
-                return Abort.serverError as! ResponseRepresentable
+                return Response(status: .badRequest, body: "Bad")
             }
         }
         
         //Set Pin to state
         pinGroup.post("set") { request in
+            let data = request.data
+
             drop.console.print(request.description, newLine: true)
-            guard let pinNumber = request.json?["pinNumber"]?.int else {return Response(status: .badRequest, body: "Wrong parameter pinNumber")}
-            guard let state = request.json?["state"]?.int else {return Response(status: .badRequest, body: "Wrong parameter state") }
+            guard let pinNumber = data["pinNumber"]?.int else {return Response(status: .badRequest, body: "Wrong parameter pinNumber")}
+            guard let state = data["state"]?.int else {return Response(status: .badRequest, body: "Wrong parameter state") }
             
             guard let pin = self.pins.first(where: { (pin) -> Bool in
                 pin.pinNumber == pinNumber
-            }) else {return  Abort.custom(status: .badRequest, message: "Unknown pin number") as! ResponseRepresentable}
+            }) else {return  Response(status: .badRequest, body:  "Unknown pin number") }
             if pin.secured {
-                guard let _ = request.json?["password"]?.string else {return Abort.custom(status: .badRequest, message: "Wrong parameter password") as! ResponseRepresentable}
+                guard let _ = data["password"]?.string else {return Response(status: .badRequest, body:  "Wrong parameter password") }
             }
             self.set(pin: pin, toState: Bool(state), completitionBlock: {
 //                return Response(status: .ok, body: "Okay")
             })
-            return Response(status: .ok, body: "Okay") as ResponseRepresentable
+            return Response(status: .ok, body: "Okay")
         }
         
         
         pinGroup.post("impulse") { request in
             drop.console.print(request.description, newLine: true)
-            guard let pinNumber = request.json?["pinNumber"]?.int else {return Response(status: .badRequest, body: "Wrong parameter pinNumber")}
-            guard let time = request.json?["time"]?.int else {return Response(status: .badRequest, body: "Wrong parameter state") }
+            let data = request.data
+            guard let pinNumber = data["pinNumber"]?.int else {return Response(status: .badRequest, body: "Wrong parameter pinNumber")}
+            guard let time = data["time"]?.int else {return Response(status: .badRequest, body: "Wrong parameter time") }
 //            guard let state = request.json?["state"]?.int else {return Abort.custom(status: .badRequest, message: "Wrong parameter state") as! ResponseRepresentable}
             
             guard let pin = self.pins.first(where: { (pin) -> Bool in
                 pin.pinNumber == pinNumber
-            }) else {return  Abort.custom(status: .badRequest, message: "Unknown pin number") as! ResponseRepresentable}
+            }) else {return  Response(status: .badRequest, body: "Unknown pin number") }
             if pin.secured {
-                guard let _ = request.json?["password"]?.string else {return Abort.custom(status: .badRequest, message: "Wrong parameter password") as! ResponseRepresentable}
+                guard let _ = data["password"]?.string else {return Response(status: .badRequest, body:  "Wrong parameter password") }
             }
             pin.gpio?.value = pin.gpio?.value == 1 ? 0 : 1
             
